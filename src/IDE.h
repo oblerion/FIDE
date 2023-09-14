@@ -19,7 +19,7 @@ struct IDE
 	int max_size;
 	int offsety;
 };
-struct IDE IDE_load(const char* file);
+void IDE_load(struct IDE* side,const char* file);
 void IDE_update(struct IDE* side);
 void IDE_draw(struct IDE* side);
 #endif 

@@ -4,30 +4,43 @@ void _ITEXT_init(struct IDE* ide)
 {
 	int ic=0;
 	int il=0;
-
-	for(int pos=0;pos<strlen(ide->cart.code);pos++)
+	for(int pos=0;pos<strlen(ide->cart.code)-1;pos++)
 	{
 		char lchar = ide->cart.code[pos];
 		if(lchar!='\n')
 		{
-			ide->itext[il][ic] = lchar;
+			//if(&ide->itext[il][ic]!=NULL)
+			//printf("%c l %d c %d\n",lchar,il,ic);
+				ide->itext[il][ic] = lchar;
 			ic++;
 		}
 		else
 		{
+			ide->itext[il][ic] = '\0';
+			//printf("%c l %d c %d\n",'#',il,ic);
 			ic=0;
-			if(il+1<200) il++;
+			if(il+1<2499) il++;
 			else break;
 		}
+	}
+	for(int y=il;y<2499;y++)
+	{
+		ide->itext[y][0] = '\0';
 	}
 }
 void _ITEXT_toCart(struct IDE* ide)
 {
 	strcpy(ide->cart.code,"");
-	for(int y=0;y<2500;y++)
+	int ret_count = 0;
+	for(int y=0;y<2499;y++)
 	{
-		if(strlen(ide->itext[y])>0)
-			strcat(ide->cart.code,TextFormat("%s\n",ide->itext[y]));
+
+		strcat(ide->cart.code,TextFormat("%s\n",ide->itext[y]));
+		if(strlen(ide->itext[y])<2) ret_count++;
+		else ret_count=0;
+
+		if(ret_count==3) break;
+
 	}
 }
 void _CURSOR_draw(struct IDE* ide)
@@ -104,7 +117,6 @@ void _IDE_addChar(struct IDE* ide,char c)
 			strcpy(ide->itext[cursor.y],TextFormat("%c%s",c,ide->itext[cursor.y]));
 			ide->cursor.x++;
 		}
-
 	}
 }
 void _IDE_remChar(struct IDE* ide)
@@ -144,20 +156,17 @@ void _IDE_remChar(struct IDE* ide)
 		}
 	}
 }
-struct IDE IDE_load(const char* file)
+void IDE_load(struct IDE* side,const char* file)
 {
-	struct IDE side;
-	side.offsety=0;
-	side.font_size=25;
-	side.max_size = 500000;
-	strcpy(side.file_name,file);
-	printf("\nsize %d\n",TextLength(LoadFileText(file)));
-	side.cart = CART_load(file);
-	printf("get code\n %s",side.cart.code);
-	_ITEXT_init(&side);
-	side.size = TextLength(side.cart.code);
-	side.cursor = CURSOR_init();
-	return side;
+	side->offsety=0;
+	side->font_size=25;
+	side->max_size = 500000;
+	strcpy(side->file_name,file);
+	side->cart = CART_load(file);
+	//printf("get code\n %s",side->cart.code);
+	_ITEXT_init(side);
+	side->size = strlen(side->cart.code);
+	side->cursor = CURSOR_init();
 }
 void IDE_update(struct IDE* side)
 {
@@ -219,6 +228,10 @@ void IDE_update(struct IDE* side)
 				const char* lc = TextToLower(TextFormat("%c",key));
 				_IDE_addChar(side,*lc);
 			}
+			else
+			{
+
+			}
 		break;
 	}
 	
@@ -235,9 +248,13 @@ void IDE_update(struct IDE* side)
 
 void IDE_draw(struct IDE* side)
 {
-	for(int y=0;y<2500;y++)
+	for(int y=0;y<2499;y++)
 	{
-		DrawText(side->itext[y],20,20+(y*side->font_size),side->font_size,BLACK);
+
+		if(side->itext[y][0]!='\0')
+		{
+			DrawText(side->itext[y],20,20+(y*side->font_size),side->font_size,BLACK);
+		}
 	}
 	_CURSOR_draw(side);
 }
