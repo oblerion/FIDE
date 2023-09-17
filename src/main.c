@@ -12,7 +12,7 @@ int main(int npar,const char* lpar[])
     InitWindow(screenWidth, screenHeight, "raylib [core] example - basic window");
 
 
-    SetTargetFPS(30);   // Set our game to run at 60 frames-per-second
+    SetTargetFPS(45);   // Set our game to run at 60 frames-per-second
     struct IDE side;
     if(npar==1)
         IDE_load(&side,"test.lua");

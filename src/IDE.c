@@ -1,12 +1,12 @@
 #include "IDE.h"
 
-void _ITEXT_init(struct IDE* ide)
+void _ITEXT_init(struct IDE* ide,const char* code)
 {
 	int ic=0;
 	int il=0;
-	for(int pos=0;pos<strlen(ide->cart.code)-1;pos++)
+	for(int pos=0;pos<strlen(code)-1;pos++)
 	{
-		char lchar = ide->cart.code[pos];
+		char lchar = code[pos];
 		if(lchar!='\n')
 		{
 			//if(&ide->itext[il][ic]!=NULL)
@@ -28,21 +28,21 @@ void _ITEXT_init(struct IDE* ide)
 		ide->itext[y][0] = '\0';
 	}
 }
-void _ITEXT_toCart(struct IDE* ide)
-{
-	strcpy(ide->cart.code,"");
-	int ret_count = 0;
-	for(int y=0;y<2499;y++)
-	{
+// void _ITEXT_toCart(struct IDE* ide)
+// {
+// 	strcpy(ide->cart.code,"");
+// 	int ret_count = 0;
+// 	for(int y=0;y<2499;y++)
+// 	{
 
-		strcat(ide->cart.code,TextFormat("%s\n",ide->itext[y]));
-		if(strlen(ide->itext[y])<2) ret_count++;
-		else ret_count=0;
+// 		strcat(ide->cart.code,TextFormat("%s\n",ide->itext[y]));
+// 		if(strlen(ide->itext[y])<2) ret_count++;
+// 		else ret_count=0;
 
-		if(ret_count==3) break;
+// 		if(ret_count==3) break;
 
-	}
-}
+// 	}
+// }
 void _CURSOR_draw(struct IDE* ide)
 {
 
@@ -51,7 +51,7 @@ void _CURSOR_draw(struct IDE* ide)
 		int y = 20+ide->cursor.y*ide->font_size;
 		int x = 20+MeasureText(TextSubtext(ide->itext[ide->cursor.y],0,ide->cursor.x),ide->font_size);
 		// const char* schar = TextFormat("%c",ide.itext[ide.cursor.y][ide.cursor.x]);
-		DrawRectangleLines(x,y,3,ide->font_size,ide->cursor.color);
+		DrawRectangleLines(x,y-(ide->offsety*ide->font_size),3,ide->font_size,ide->cursor.color);
 
 		ide->cursor.timer -= GetFrameTime();
 	}
@@ -65,7 +65,7 @@ void _CURSOR_draw(struct IDE* ide)
 
 void _IDE_gotoNextLine(struct IDE* side)
 {
-	if(side->cursor.y+1<2500) side->cursor.y++;
+	if(side->cursor.y+1<MAX_LINE) side->cursor.y++;
 }
 void _IDE_gotoBeforeLine(struct IDE* side)
 {
@@ -162,30 +162,74 @@ void IDE_load(struct IDE* side,const char* file)
 	side->font_size=25;
 	side->max_size = 500000;
 	strcpy(side->file_name,file);
-	side->cart = CART_load(file);
+	//side->cart = CART_load(file);
 	//printf("get code\n %s",side->cart.code);
-	_ITEXT_init(side);
-	side->size = strlen(side->cart.code);
+	//_ITEXT_init(side);
+	_ITEXT_init(side,LoadFileText(file));
 	side->cursor = CURSOR_init();
 }
 void IDE_update(struct IDE* side)
 {
-	int key = GetKeyPressed();
+	if(side->timer<=0)
+	{
+		if(IsKeyDown(KEY_LEFT))
+		{
+			if(side->cursor.x>0) side->cursor.x--;
+			side->timer = 0.06f;
+		}
+		else if(IsKeyDown(KEY_RIGHT))
+		{
+			if(side->cursor.x < strlen(side->itext[side->cursor.y]))
+			{
+				side->cursor.x++;				
+			}
+			side->timer = 0.06f;
+		}
+		else if(IsKeyDown(KEY_DOWN))
+		{
+			_IDE_gotoNextLine(side);
+			if(side->cursor.y>side->offsety+34) 
+			{
+				side->offsety++;
+			}
+			side->timer = 0.05f;
+		}
+		else if(IsKeyDown(KEY_UP))
+		{
+			_IDE_gotoBeforeLine(side);
+			if(side->cursor.y==side->offsety && side->offsety>0) 
+			{
+				side->offsety--;
+			}
+			side->timer = 0.05f;
+		}
+		else if(GetMouseWheelMove()<0)
+		{
+			_IDE_gotoNextLine(side);
+			_IDE_gotoNextLine(side);
+			if(side->cursor.y>side->offsety+34) 
+			{
+				side->offsety+=2;
+			}
+			side->timer = 0.03f;
+		}
+		else if(GetMouseWheelMove()>0)
+		{
+			_IDE_gotoBeforeLine(side);
+			_IDE_gotoBeforeLine(side);
+			if(side->cursor.y==side->offsety && side->offsety>1) 
+			{
+				side->offsety-=2;
+			}
+			side->timer = 0.03f;
+		}
+	}
+	else
+		side->timer -= GetFrameTime();
 
+	int key = GetKeyPressed();
 	switch(key)
 	{
-		case KEY_LEFT:
-			if(side->cursor.x>0) side->cursor.x--;
-		break;
-		case KEY_RIGHT:
-			if(side->cursor.x+1 < 199) side->cursor.x++;
-		break;
-		case KEY_DOWN:
-			_IDE_gotoNextLine(side);
-		break;
-		case KEY_UP:
-			_IDE_gotoBeforeLine(side);
-		break;
 		case KEY_BACKSPACE:
 			_IDE_remChar(side);
 		break;
@@ -218,19 +262,31 @@ void IDE_update(struct IDE* side)
 			system(TextFormat("tic80 --skip %s",side->file_name));
 		break;
 		case KEY_F1:
-			_ITEXT_toCart(side);
-			CART_save(side->cart,"t.lua");
+			//_ITEXT_toCart(side);
+			//CART_save(side->cart,"t.lua");
 		break;
 		default:
 
 			if(key>=KEY_A && key<=KEY_Z)
 			{
-				const char* lc = TextToLower(TextFormat("%c",key));
-				_IDE_addChar(side,*lc);
+				if(IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT))
+				{
+					const char* lc = TextFormat("%c",key);
+					_IDE_addChar(side,*lc);
+				}
+				else
+				{
+					const char* lc = TextToLower(TextFormat("%c",key));
+					_IDE_addChar(side,*lc);
+				}
 			}
-			else
+			else if(key>=KEY_ZERO && key<=KEY_NINE)
 			{
-
+				if(IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT))
+				{
+					const char* lc = TextFormat("%c",key);
+					_IDE_addChar(side,*lc);
+				}	
 			}
 		break;
 	}
@@ -248,12 +304,12 @@ void IDE_update(struct IDE* side)
 
 void IDE_draw(struct IDE* side)
 {
-	for(int y=0;y<2499;y++)
+// 2499
+	for(int y=side->offsety;y<side->offsety+35;y++)
 	{
-
 		if(side->itext[y][0]!='\0')
 		{
-			DrawText(side->itext[y],20,20+(y*side->font_size),side->font_size,BLACK);
+			DrawText(side->itext[y],20,20+(y*side->font_size)-(side->offsety*side->font_size),side->font_size,BLACK);
 		}
 	}
 	_CURSOR_draw(side);

@@ -9,7 +9,7 @@ DOBJ="build/linux64/obj/"
 
 RAYLIBWIN="/home/desnot/GD/raylib-4.0.0_win32_mingw-w64"
 RAYLIBWEB="/home/desnot/GD/raylib-4.0.0_webassembly"
-CC2=i686-w64-mingw32-g++
+CC2=i686-w64-mingw32-gcc
 CFLAGS2="-g -Wall -lm -L${RAYLIBWIN}/lib -lraylib -lopengl32 -lgdi32 -lwinmm -mwindows -static-libgcc" 
 #-static-libstdc++ -static-libgcc"
 INC2="-I${RAYLIBWIN}/include -I/usr/i696-w64-mingw32/include"

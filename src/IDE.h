@@ -8,16 +8,17 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#define MAX_LINE 2500
 struct IDE
 {
 	char file_name[40];
-	struct CART cart;
 	struct CURSOR cursor;
-	char itext[2500][200];
+	char itext[MAX_LINE][200];
 	int font_size;
 	unsigned int size;
 	int max_size;
 	int offsety;
+	float timer;
 };
 void IDE_load(struct IDE* side,const char* file);
 void IDE_update(struct IDE* side);

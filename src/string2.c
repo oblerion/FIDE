@@ -12,7 +12,7 @@ int strtonumber(const char* str)
 	}
 	return n;
 }
-int strfind(char* dstr,char* s,int posb)
+int strfind(const char* dstr,char* s,int posb)
 {
     int tofnd = strlen(s);
     int fnd=0;
@@ -40,7 +40,7 @@ int strfind(char* dstr,char* s,int posb)
     }
     return pos;
 }
-const char* strsub(char* dstr,int ib,int ie)
+const char* strsub(const char* dstr,int ib,int ie)
 {
 	if(ib>-1 && ie>ib)
 	{
