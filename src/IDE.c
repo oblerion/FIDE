@@ -1,5 +1,6 @@
 #include "IDE.h"
 
+
 void _ITEXT_init(struct IDE* ide,const char* code)
 {
 	int ic=0;
@@ -9,21 +10,18 @@ void _ITEXT_init(struct IDE* ide,const char* code)
 		char lchar = code[pos];
 		if(lchar!='\n')
 		{
-			//if(&ide->itext[il][ic]!=NULL)
-			//printf("%c l %d c %d\n",lchar,il,ic);
-				ide->itext[il][ic] = lchar;
+			ide->itext[il][ic] = lchar;
 			ic++;
 		}
 		else
 		{
 			ide->itext[il][ic] = '\0';
-			//printf("%c l %d c %d\n",'#',il,ic);
 			ic=0;
 			if(il+1<2499) il++;
 			else break;
 		}
 	}
-	for(int y=il;y<2499;y++)
+	for(int y=il;y<MAX_LINE;y++)
 	{
 		ide->itext[y][0] = '\0';
 	}
@@ -162,6 +160,7 @@ void IDE_load(struct IDE* side,const char* file)
 	side->font_size=25;
 	side->max_size = 500000;
 	strcpy(side->file_name,file);
+	side->layout = KBD_FR_BEL_VAR;
 	//side->cart = CART_load(file);
 	//printf("get code\n %s",side->cart.code);
 	//_ITEXT_init(side);
@@ -227,7 +226,8 @@ void IDE_update(struct IDE* side)
 	else
 		side->timer -= GetFrameTime();
 
-	int key = GetKeyPressed();
+	//int key = _Azerty_GetKeyPressed();
+	int key = Kbd_GetKeyPressed(side->layout);
 	switch(key)
 	{
 		case KEY_BACKSPACE:
@@ -240,18 +240,19 @@ void IDE_update(struct IDE* side)
 			_IDE_addChar(side,'\t');
 		break;
 		case KEY_ENTER:
-			if(side->cursor.x==0)
+			// if(side->cursor.x==0)
+			// {
+			// 	for(int i=MAX_LINE-1;i>=side->cursor.y+1;i--)
+			// 	{
+			// 			strcpy(side->itext[i+1],side->itext[i]);
+			// 			strcpy(side->itext[i],"");
+			// 	}
+			// 	side->cursor.y++;
+			// }
+			// else 
+			if(side->cursor.x==strlen(side->itext[side->cursor.y]))
 			{
-				for(int i=2498;i>=side->cursor.y;i--)
-				{
-						strcpy(side->itext[i+1],side->itext[i]);
-						strcpy(side->itext[i],"");
-				}
-				side->cursor.y++;
-			}
-			else if(side->cursor.x==strlen(side->itext[side->cursor.y]))
-			{
-				if(side->cursor.y<2500)
+				if(side->cursor.y<MAX_LINE)
 				{
 					side->cursor.x=0;
 					side->cursor.y++;
@@ -266,28 +267,33 @@ void IDE_update(struct IDE* side)
 			//CART_save(side->cart,"t.lua");
 		break;
 		default:
-
-			if(key>=KEY_A && key<=KEY_Z)
-			{
-				if(IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT))
-				{
-					const char* lc = TextFormat("%c",key);
-					_IDE_addChar(side,*lc);
-				}
-				else
-				{
-					const char* lc = TextToLower(TextFormat("%c",key));
-					_IDE_addChar(side,*lc);
-				}
-			}
-			else if(key>=KEY_ZERO && key<=KEY_NINE)
-			{
-				if(IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT))
-				{
-					const char* lc = TextFormat("%c",key);
-					_IDE_addChar(side,*lc);
-				}	
-			}
+			//const char* lc = TextFormat("%c",key);
+			if( key != KEY_LEFT_SHIFT && 
+				key != KEY_RIGHT_SHIFT && 
+				key != KEY_LEFT_ALT &&
+				key != KEY_RIGHT_ALT)
+			_IDE_addChar(side,*TextFormat("%c",key));
+			// if((key>=KEY_A && key<=KEY_Z))
+			// {
+			// 	if(IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT))
+			// 	{
+			// 		const char* lc = TextFormat("%c",key);
+			// 		_IDE_addChar(side,*lc);
+			// 	}
+			// 	else
+			// 	{
+			// 		const char* lc = TextToLower(TextFormat("%c",key));
+			// 		_IDE_addChar(side,*lc);
+			// 	}
+			// }
+			// else if(key>=KEY_ZERO && key<=KEY_NINE)
+			// {
+			// 	if(IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT))
+			// 	{
+			// 		const char* lc = TextFormat("%c",key);
+			// 		_IDE_addChar(side,*lc);
+			// 	}	
+			// }
 		break;
 	}
 	
