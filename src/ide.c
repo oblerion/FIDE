@@ -226,7 +226,7 @@ void IDE_update(struct IDE* side)
 		side->timer -= GetFrameTime();
 
 	//int key = _Azerty_GetKeyPressed();
-	int key = Kbd_GetKeyPressed(FR_BEL_VAR);
+	int key = Kbd_GetKeyPressed(FR);
 	//int key=0;
 	switch(key)
 	{

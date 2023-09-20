@@ -2,8 +2,15 @@
 // 30 layout, 300 key with 4 int (input,base,shift,alt)
 // input is on qwerty us keyboard 
 const int KBD_LAYOUT[30][300][4] = {
-    {
-        //FR_BEL_VAR , id 0
+    {// FR MINIMAL , id 0
+        {KEY_Q,KEY_A,0,0},
+        {KEY_W,KEY_Z,0,0},
+        {KEY_A,KEY_Q,0,0},
+        {KEY_Z,KEY_W,0,0},
+        {KEY_SEMICOLON,KEY_M,0,0},//;
+        {KEY_M,KEY_COMMA,0,0}
+    },
+    {//FR_BEL_VAR , id 1
         {KEY_ZERO,0,KEY_ZERO,125},
         {KEY_ONE,38,KEY_ONE,124},
         {KEY_TWO,0,KEY_TWO,64},

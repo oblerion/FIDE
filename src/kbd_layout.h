@@ -4,8 +4,9 @@
 
 typedef enum 
 {
-    EN=-1,
-    FR_BEL_VAR=0
+    EN=-1,//default
+    FR=0,
+    FR_BEL_VAR=1
 }KBD_Layout;
 
 int Kbd_GetKeyPressed(KBD_Layout layout);
