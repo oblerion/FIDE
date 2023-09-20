@@ -1,4 +1,4 @@
-#include "KBD_LAYOUT.h"
+#include "kbd_layout.h"
 // 30 layout, 300 key with 4 int (input,base,shift,alt)
 // input is on qwerty us keyboard 
 const int KBD_LAYOUT[30][300][4] = {

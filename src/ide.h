@@ -1,9 +1,9 @@
 #ifndef IDE_H
 #define IDE_H
 #include "raylib.h"
-#include "CURSOR.h"
-#include "KBD_LAYOUT.h"
-#include "MATH.h"
+#include "cursor.h"
+#include "kbd_layout.h"
+#include "math.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>

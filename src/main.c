@@ -1,5 +1,5 @@
 #include "raylib.h"
-#include "IDE.h"
+#include "ide.h"
 int main(int npar,const char* lpar[])
 {
 

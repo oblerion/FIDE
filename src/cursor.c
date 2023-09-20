@@ -1,4 +1,4 @@
-#include "CURSOR.h"
+#include "cursor.h"
 struct CURSOR CURSOR_init()
 {
 	struct CURSOR cur ={

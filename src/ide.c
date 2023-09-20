@@ -1,4 +1,4 @@
-#include "IDE.h"
+#include "ide.h"
 
 
 void _ITEXT_init(struct IDE* ide,const char* code)
