@@ -160,7 +160,6 @@ void IDE_load(struct IDE* side,const char* file)
 	side->font_size=25;
 	side->max_size = 500000;
 	strcpy(side->file_name,file);
-	side->layout = KBD_FR_BEL_VAR;
 	//side->cart = CART_load(file);
 	//printf("get code\n %s",side->cart.code);
 	//_ITEXT_init(side);
@@ -227,7 +226,8 @@ void IDE_update(struct IDE* side)
 		side->timer -= GetFrameTime();
 
 	//int key = _Azerty_GetKeyPressed();
-	int key = Kbd_GetKeyPressed(side->layout);
+	int key = Kbd_GetKeyPressed(FR_BEL_VAR);
+	//int key=0;
 	switch(key)
 	{
 		case KEY_BACKSPACE:

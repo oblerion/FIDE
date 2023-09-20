@@ -2,8 +2,7 @@
 #define IDE_H
 #include "raylib.h"
 #include "CURSOR.h"
-#include "KEYBOARD.h"
-#include "CART.h"
+#include "KBD_LAYOUT.h"
 #include "MATH.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -15,7 +14,6 @@ struct IDE
 {
 	char file_name[40];
 	struct CURSOR cursor;
-	enum KbdLayout layout;
 	char itext[MAX_LINE][200];
 	char kbd_layout[20];
 	int font_size;

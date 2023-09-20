@@ -51,6 +51,7 @@ function link(){
 
 if [ $# -eq 0 ];then 
 # default
+	rm -f $TEXEC;
 	init "$CC" "$INC" "$CFLAGS" "$EXEC" "$DOBJ";
 	comp;
 	link;
