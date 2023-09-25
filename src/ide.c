@@ -1,5 +1,30 @@
 #include "ide.h"
+struct CURSOR CURSOR_init()
+{
+	struct CURSOR cur ={
+		0,0,0.5,WHITE
+	};
+	return cur;
+}
 
+void CURSOR_draw(struct IDE *ide)
+{
+	if(ide->cursor.timer>0)
+	{
+		int y = 20+ide->cursor.y*ide->font_size;
+		int x = ide->offset_borderx+MeasureText(TextSubtext(ide->itext[ide->cursor.y],0,ide->cursor.x),ide->font_size);
+		// const char* schar = TextFormat("%c",ide.itext[ide.cursor.y][ide.cursor.x]);
+		DrawRectangleLines(x,y-(ide->offsety*ide->font_size),3,ide->font_size,ide->cursor.color);
+
+		ide->cursor.timer -= GetFrameTime();
+	}
+	else if(ide->cursor.timer<0)
+	{
+		ide->cursor.timer -= GetFrameTime();
+		if(ide->cursor.timer<-0.2)
+			ide->cursor.timer = 0.3;
+	}
+}
 
 void _ITEXT_init(struct IDE* ide,const char* code)
 {
@@ -26,74 +51,51 @@ void _ITEXT_init(struct IDE* ide,const char* code)
 		ide->itext[y][0] = '\0';
 	}
 }
-// void _ITEXT_toCart(struct IDE* ide)
-// {
-// 	strcpy(ide->cart.code,"");
-// 	int ret_count = 0;
-// 	for(int y=0;y<2499;y++)
-// 	{
 
-// 		strcat(ide->cart.code,TextFormat("%s\n",ide->itext[y]));
-// 		if(strlen(ide->itext[y])<2) ret_count++;
-// 		else ret_count=0;
-
-// 		if(ret_count==3) break;
-
-// 	}
-// }
-void _CURSOR_draw(struct IDE* ide)
-{
-
-	if(ide->cursor.timer>0)
-	{
-		int y = 20+ide->cursor.y*ide->font_size;
-		int x = 20+MeasureText(TextSubtext(ide->itext[ide->cursor.y],0,ide->cursor.x),ide->font_size);
-		// const char* schar = TextFormat("%c",ide.itext[ide.cursor.y][ide.cursor.x]);
-		DrawRectangleLines(x,y-(ide->offsety*ide->font_size),3,ide->font_size,ide->cursor.color);
-
-		ide->cursor.timer -= GetFrameTime();
-	}
-	else if(ide->cursor.timer<0)
-	{
-		ide->cursor.timer -= GetFrameTime();
-		if(ide->cursor.timer<-0.2)
-			ide->cursor.timer = 0.3;
-	}
-}
 
 void _IDE_gotoNextLine(struct IDE* side)
 {
-	if(side->cursor.y+1<MAX_LINE) side->cursor.y++;
+	if(side->cursor.y+1<MAX_LINE) 
+	{
+		side->cursor.y++;
+		int size = strlen(side->itext[side->cursor.y]);
+		if(size<side->cursor.x) 
+			side->cursor.x = size;
+	}
 }
 void _IDE_gotoBeforeLine(struct IDE* side)
 {
-	if(side->cursor.y-1>-1) side->cursor.y--;
+	if(side->cursor.y-1>-1)
+	{
+		side->cursor.y--;
+		int size = strlen(side->itext[side->cursor.y]);
+		if(size<side->cursor.x) 
+			side->cursor.x = size;
+	}
 }
-int _IDE_ifCollideMouse(struct IDE side)
+void _IDE_ifCollideMouse(struct IDE side,int* px,int* py)
 {
-	// int ix = 0;
-	// int iy = 0;
- //
-	// for(int i=0;i<side.size;i++)
-	// {
-	// 	char ich = side.cart.code[i]; //side.list_char[i];
-	// 	const char* schar = TextFormat("%c",ich);
-	// 	//DrawText(schar,20+ix,20+iy,side.font_size,BLACK);
-	// 	if(MATH_collide(ix+20,iy+20,MeasureText(schar,side.font_size),side.font_size,GetMouseX(),GetMouseY(),10,10)==1)
-	// 	{
-	// 		return i;
-	// 	}
-	// 	if(*schar=='\n')
-	// 	{
-	// 		iy += side.font_size;
-	// 		ix = 0;
-	// 	}
-	// 	else
-	// 	{
-	// 		ix += MeasureText(schar,side.font_size)+2;
-	// 	}
-	// }
-	return -1;
+
+	int mousex = GetMouseX();
+	int mousey = GetMouseY()+5;
+	int my = floor(mousey/side.font_size)+side.offsety;
+	int size = strlen(side.itext[my]);
+
+	int ix=0;
+	for(int i=0;i<size;i++)
+	{
+		char c = side.itext[my][i];
+		if( MATH_collide(ix,mousey,MeasureText(TextFormat("%c",c),side.font_size),side.font_size,
+			mousex,mousey,5,5)==1)
+		{
+			*py = my;
+			*px = i-1;
+			return;	
+		}
+		ix += MeasureText(TextFormat("%c",c),side.font_size)+2;
+	}
+	*py=my;
+	*px=0;
 }
 void _IDE_addChar(struct IDE* ide,char c)
 {
@@ -156,13 +158,12 @@ void _IDE_remChar(struct IDE* ide)
 }
 void IDE_load(struct IDE* side,const char* file)
 {
-	side->offsety=0;
-	side->font_size=25;
+	side->offsety = 0;
+	side->font_size = 25;
 	side->max_size = 500000;
 	strcpy(side->file_name,file);
-	//side->cart = CART_load(file);
-	//printf("get code\n %s",side->cart.code);
-	//_ITEXT_init(side);
+	side->layout = EN;
+	side->offset_borderx = MeasureText("000000",18);
 	_ITEXT_init(side,LoadFileText(file));
 	side->cursor = CURSOR_init();
 }
@@ -173,7 +174,7 @@ void IDE_update(struct IDE* side)
 		if(IsKeyDown(KEY_LEFT))
 		{
 			if(side->cursor.x>0) side->cursor.x--;
-			side->timer = 0.06f;
+			side->timer = 0.08f;
 		}
 		else if(IsKeyDown(KEY_RIGHT))
 		{
@@ -181,7 +182,7 @@ void IDE_update(struct IDE* side)
 			{
 				side->cursor.x++;				
 			}
-			side->timer = 0.06f;
+			side->timer = 0.08f;
 		}
 		else if(IsKeyDown(KEY_DOWN))
 		{
@@ -190,7 +191,7 @@ void IDE_update(struct IDE* side)
 			{
 				side->offsety++;
 			}
-			side->timer = 0.05f;
+			side->timer = 0.08f;
 		}
 		else if(IsKeyDown(KEY_UP))
 		{
@@ -199,7 +200,7 @@ void IDE_update(struct IDE* side)
 			{
 				side->offsety--;
 			}
-			side->timer = 0.05f;
+			side->timer = 0.08f;
 		}
 		else if(GetMouseWheelMove()<0)
 		{
@@ -221,89 +222,74 @@ void IDE_update(struct IDE* side)
 			}
 			side->timer = 0.03f;
 		}
+		else
+		{
+			int key = Kbd_GetKeyPressed(side->layout);
+			//int key=0;
+			switch(key)
+			{
+				case KEY_BACKSPACE:
+					_IDE_remChar(side);
+				break;
+				case KEY_SPACE:
+					_IDE_addChar(side,' ');
+				break;
+				case KEY_TAB:
+					_IDE_addChar(side,'\t');
+				break;
+				case KEY_ENTER:
+					// if(side->cursor.x==0)
+					// {
+					// 	for(int i=MAX_LINE-1;i>=side->cursor.y+1;i--)
+					// 	{
+					// 			strcpy(side->itext[i+1],side->itext[i]);
+					// 			strcpy(side->itext[i],"");
+					// 	}
+					// 	side->cursor.y++;
+					// }
+					// else 
+					if(side->cursor.x==strlen(side->itext[side->cursor.y]))
+					{
+						if(side->cursor.y<MAX_LINE)
+						{
+							side->cursor.x=0;
+							side->cursor.y++;
+						}
+					}
+				break;
+				case KEY_F5:
+					system(TextFormat("tic80 --skip %s",side->file_name));
+				break;
+				case KEY_F1:
+					//_ITEXT_toCart(side);
+					//CART_save(side->cart,"t.lua");
+				break;
+				default:
+					//const char* lc = TextFormat("%c",key);
+					if( key != KEY_LEFT_SHIFT && 
+						key != KEY_RIGHT_SHIFT && 
+						key != KEY_LEFT_ALT &&
+						key != KEY_RIGHT_ALT &&
+						key != 0)
+					_IDE_addChar(side,*TextFormat("%c",key));
+				break;
+			}
+		}
 	}
 	else
 		side->timer -= GetFrameTime();
-
-	//int key = _Azerty_GetKeyPressed();
-	int key = Kbd_GetKeyPressed(FR);
-	//int key=0;
-	switch(key)
-	{
-		case KEY_BACKSPACE:
-			_IDE_remChar(side);
-		break;
-		case KEY_SPACE:
-			_IDE_addChar(side,' ');
-		break;
-		case KEY_TAB:
-			_IDE_addChar(side,'\t');
-		break;
-		case KEY_ENTER:
-			// if(side->cursor.x==0)
-			// {
-			// 	for(int i=MAX_LINE-1;i>=side->cursor.y+1;i--)
-			// 	{
-			// 			strcpy(side->itext[i+1],side->itext[i]);
-			// 			strcpy(side->itext[i],"");
-			// 	}
-			// 	side->cursor.y++;
-			// }
-			// else 
-			if(side->cursor.x==strlen(side->itext[side->cursor.y]))
-			{
-				if(side->cursor.y<MAX_LINE)
-				{
-					side->cursor.x=0;
-					side->cursor.y++;
-				}
-			}
-		break;
-		case KEY_F5:
-			system(TextFormat("tic80 --skip %s",side->file_name));
-		break;
-		case KEY_F1:
-			//_ITEXT_toCart(side);
-			//CART_save(side->cart,"t.lua");
-		break;
-		default:
-			//const char* lc = TextFormat("%c",key);
-			if( key != KEY_LEFT_SHIFT && 
-				key != KEY_RIGHT_SHIFT && 
-				key != KEY_LEFT_ALT &&
-				key != KEY_RIGHT_ALT)
-			_IDE_addChar(side,*TextFormat("%c",key));
-			// if((key>=KEY_A && key<=KEY_Z))
-			// {
-			// 	if(IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT))
-			// 	{
-			// 		const char* lc = TextFormat("%c",key);
-			// 		_IDE_addChar(side,*lc);
-			// 	}
-			// 	else
-			// 	{
-			// 		const char* lc = TextToLower(TextFormat("%c",key));
-			// 		_IDE_addChar(side,*lc);
-			// 	}
-			// }
-			// else if(key>=KEY_ZERO && key<=KEY_NINE)
-			// {
-			// 	if(IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT))
-			// 	{
-			// 		const char* lc = TextFormat("%c",key);
-			// 		_IDE_addChar(side,*lc);
-			// 	}	
-			// }
-		break;
-	}
+	
 	
 	if(IsMouseButtonPressed(0))
 	{
-		// int id = _IDE_ifCollideMouse(*side);
-		// if(id !=-1)
-		// {
-		// 	side->cursor.pos = id;
-		// }
+		int x;
+		int y;
+		_IDE_ifCollideMouse(*side,&x,&y);
+		if(x>-1 && y>-1)
+		{
+			side->cursor.x = x;
+			side->cursor.y = y;
+		}
 	}
 	
 }
@@ -315,9 +301,12 @@ void IDE_draw(struct IDE* side)
 	{
 		if(side->itext[y][0]!='\0')
 		{
-			DrawText(side->itext[y],20,20+(y*side->font_size)-(side->offsety*side->font_size),side->font_size,BLACK);
+			DrawText(TextFormat("%d",y),5,20+(y*side->font_size)-(side->offsety*side->font_size)+4,18,BLACK);
+			DrawLine(side->offset_borderx-4,0,side->offset_borderx-4,GetScreenHeight(),BLACK);
+			DrawText(TextFormat("%s",side->itext[y]),
+			side->offset_borderx,20+(y*side->font_size)-(side->offsety*side->font_size),side->font_size,BLACK);
 		}
 	}
-	_CURSOR_draw(side);
+	CURSOR_draw(side);
 }
 

@@ -15,10 +15,22 @@ int main(int npar,const char* lpar[])
     SetTargetFPS(45);   // Set our game to run at 60 frames-per-second
     struct IDE side;
     if(npar==1)
+    {
         IDE_load(&side,"./test.lua");
+        side.layout = FR_BEL_VAR;
+    }
     else
-        IDE_load(&side,lpar[1]);
-
+    {
+        if(FileExists(lpar[1]))
+        {
+            IDE_load(&side,lpar[1]);
+            side.layout = FR_BEL_VAR;
+        }
+        else
+        {
+            puts("error in loading");
+        }
+    }
     puts("IDE is load");
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
@@ -28,6 +40,7 @@ int main(int npar,const char* lpar[])
             IDE_draw(&side);
 
         EndDrawing();
+        if(Kbd_IsKeyPress(side.layout,KEY_A)) puts("press a");
     }
     CloseWindow();        // Close window and OpenGL
 
