@@ -1,7 +1,9 @@
 #include "kbd_layout.h"
 // 30 layout, 300 key with 4 int (input,base,shift,alt)
 // input is on qwerty us keyboard 
-const int KBD_LAYOUT[30][300][4] = {
+#define MAX_LAYOUT 30
+#define MAX_KEY 300
+const int KBD_LAYOUT[MAX_LAYOUT][MAX_KEY][4] = {
     {// FR MINIMAL , id 0
         {KEY_Q,KEY_A,0,0},
         {KEY_W,KEY_Z,0,0},
@@ -69,10 +71,9 @@ int Kbd_GetKeyPressed(KBD_Layout layout)
 	int c = GetKeyPressed();
     bool shift = IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT);
     bool alt = IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT);
-    //if(c>0) printf("char %d\n",c);
     if(layout != EN)
     {
-        for(int i=0;i<300;i++)
+        for(int i=0;i<MAX_KEY;i++)
         {
             if(KBD_LAYOUT[layout][i][0]==c)
             {
@@ -89,7 +90,7 @@ bool Kbd_IsKeyDown(KBD_Layout layout, int key)
 {
     if(layout!=EN)
     {
-        for(int i=0;i<300;i++)
+        for(int i=0;i<MAX_KEY;i++)
         {
             if(KBD_LAYOUT[layout][i][0]==key)
             {
@@ -103,11 +104,11 @@ bool Kbd_IsKeyDown(KBD_Layout layout, int key)
     }
     return IsKeyDown(key);
 }
-bool Kbd_IsKeyPress(KBD_Layout layout, int key)
+bool Kbd_IsKeyPressed(KBD_Layout layout, int key)
 {
     if(layout!=EN)
     {
-        for(int i=0;i<300;i++)
+        for(int i=0;i<MAX_KEY;i++)
         {
             if(KBD_LAYOUT[layout][i][0]==key)
             {
