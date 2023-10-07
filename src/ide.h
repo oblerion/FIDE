@@ -2,6 +2,7 @@
 #define IDE_H
 #include "raylib.h"
 #include "kbd_layout.h"
+#include "ui_menu.h"
 #include "math.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -20,6 +21,7 @@ struct IDE
 {
 	char file_name[40];
 	struct CURSOR cursor;
+	UI_MENU uimenu;
 	KBD_Layout layout;
 	char itext[MAX_LINE][200];
 	char kbd_layout[20];

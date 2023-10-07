@@ -7,8 +7,8 @@ INC=" "
 EXEC="main"
 DOBJ="build/linux64/obj/"
 
-RAYLIBWIN="/home/desnot/GD/raylib-4.0.0_win32_mingw-w64"
-RAYLIBWEB="/home/desnot/GD/raylib-4.0.0_webassembly"
+RAYLIBWIN="/home/desnot/GD/raylib-4.5.0_win32_mingw-w64"
+RAYLIBWEB="/home/desnot/GD/raylib-4.5.0_webassembly"
 CC2=i686-w64-mingw32-gcc
 CFLAGS2="-g -Wall -lm -L${RAYLIBWIN}/lib -lraylib -lopengl32 -lgdi32 -lwinmm -mwindows -static-libgcc" 
 #-static-libstdc++ -static-libgcc"
@@ -60,5 +60,5 @@ elif [ "$1" == "w" ];then
 	comp;
 	link;
 elif [ "$1" == "web" ];then
-	emcc -o game.html main.c -Os -Wall -I${RAYLIBWEB}/include -L${RAYLIBWEB}/lib -llibraylib.a -s USE_GLFW=3 -DPLATFORM_WE
+	emcc -o game.html main.c -Os -Wall -I${RAYLIBWEB}/include -L${RAYLIBWEB}/lib -llibraylib.a -s USE_GLFW=3 -DPLATFORM_WEB
 fi

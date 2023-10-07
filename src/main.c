@@ -1,5 +1,6 @@
 #include "raylib.h"
 #include "ide.h"
+#include "ui.h"
 int main(int npar,const char* lpar[])
 {
 
@@ -11,9 +12,9 @@ int main(int npar,const char* lpar[])
     const int screenHeight = 900;
     InitWindow(screenWidth, screenHeight, "raylib [core] example - basic window");
 
-
     SetTargetFPS(45);   // Set our game to run at 60 frames-per-second
     struct IDE side;
+    struct UI_BUTTON ubutton = UI_BUTTON(23,23,"play",25,BLACK);
     if(npar==1)
     {
         IDE_load(&side,"./test.lua");
@@ -38,9 +39,8 @@ int main(int npar,const char* lpar[])
         BeginDrawing();
             ClearBackground(BLUE);
             IDE_draw(&side);
-
+            UI_BUTTON_draw(&ubutton);
         EndDrawing();
-        if(Kbd_IsKeyPress(side.layout,KEY_A)) puts("press a");
     }
     CloseWindow();        // Close window and OpenGL
 

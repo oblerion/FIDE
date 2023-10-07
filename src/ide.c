@@ -166,6 +166,7 @@ void IDE_load(struct IDE* side,const char* file)
 	side->offset_borderx = MeasureText("000000",18);
 	_ITEXT_init(side,LoadFileText(file));
 	side->cursor = CURSOR_init();
+	side->uimenu = UI_MENU_init();
 }
 void IDE_update(struct IDE* side)
 {
@@ -270,6 +271,8 @@ void IDE_update(struct IDE* side)
 						key != KEY_RIGHT_SHIFT && 
 						key != KEY_LEFT_ALT &&
 						key != KEY_RIGHT_ALT &&
+						key != KEY_LEFT_CONTROL &&
+						key != KEY_RIGHT_CONTROL &&
 						key != 0)
 					_IDE_addChar(side,*TextFormat("%c",key));
 				break;
@@ -279,19 +282,29 @@ void IDE_update(struct IDE* side)
 	else
 		side->timer -= GetFrameTime();
 	
-	
-	if(IsMouseButtonPressed(0))
+	if(IsKeyDown(KEY_LEFT_CONTROL) ||
+			IsKeyDown(KEY_RIGHT_CONTROL))
 	{
-		int x;
-		int y;
-		_IDE_ifCollideMouse(*side,&x,&y);
-		if(x>-1 && y>-1)
-		{
-			side->cursor.x = x;
-			side->cursor.y = y;
-		}
+		side->uimenu.visible=true;
+	}	
+	else
+	{
+		side->uimenu.visible=false;
 	}
-	
+
+
+	// if(IsMouseButtonPressed(0))
+	// {
+	// 	int x;
+	// 	int y;
+	// 	_IDE_ifCollideMouse(*side,&x,&y);
+	// 	if(x>-1 && y>-1)
+	// 	{
+	// 		side->cursor.x = x;
+	// 		side->cursor.y = y;
+	// 	}
+	// }
+	UI_MENU_update(&side->uimenu);
 }
 
 void IDE_draw(struct IDE* side)
@@ -308,5 +321,6 @@ void IDE_draw(struct IDE* side)
 		}
 	}
 	CURSOR_draw(side);
+	UI_MENU_draw(&side->uimenu);
 }
 
