@@ -1,6 +1,7 @@
 #include "raylib.h"
 #include "ide.h"
 #include "ui.h"
+
 int main(int npar,const char* lpar[])
 {
 
@@ -14,7 +15,6 @@ int main(int npar,const char* lpar[])
 
     SetTargetFPS(45);   // Set our game to run at 60 frames-per-second
     struct IDE side;
-    struct UI_BUTTON ubutton = UI_BUTTON(23,23,"play",25,BLACK);
     if(npar==1)
     {
         IDE_load(&side,"./test.lua");
@@ -39,11 +39,10 @@ int main(int npar,const char* lpar[])
         BeginDrawing();
             ClearBackground(BLUE);
             IDE_draw(&side);
-            UI_BUTTON_draw(&ubutton);
         EndDrawing();
     }
     CloseWindow();        // Close window and OpenGL
-
+    IDE_free(&side);
     return 0;
 }
 

@@ -166,124 +166,128 @@ void IDE_load(struct IDE* side,const char* file)
 	side->offset_borderx = MeasureText("000000",18);
 	_ITEXT_init(side,LoadFileText(file));
 	side->cursor = CURSOR_init();
-	side->uimenu = UI_MENU_init();
+	side->uimenu = IDE_MENU();
 }
 void IDE_update(struct IDE* side)
 {
-	if(side->timer<=0)
+	if(side->uimenu.uifileio.visible==false)
 	{
-		if(IsKeyDown(KEY_LEFT))
+		if(side->timer<=0)
 		{
-			if(side->cursor.x>0) side->cursor.x--;
-			side->timer = 0.08f;
-		}
-		else if(IsKeyDown(KEY_RIGHT))
-		{
-			if(side->cursor.x < strlen(side->itext[side->cursor.y]))
+			if(IsKeyDown(KEY_LEFT))
 			{
-				side->cursor.x++;				
+				if(side->cursor.x>0) side->cursor.x--;
+				side->timer = 0.08f;
 			}
-			side->timer = 0.08f;
-		}
-		else if(IsKeyDown(KEY_DOWN))
-		{
-			_IDE_gotoNextLine(side);
-			if(side->cursor.y>side->offsety+34) 
+			else if(IsKeyDown(KEY_RIGHT))
 			{
-				side->offsety++;
+				if(side->cursor.x < strlen(side->itext[side->cursor.y]))
+				{
+					side->cursor.x++;				
+				}
+				side->timer = 0.08f;
 			}
-			side->timer = 0.08f;
-		}
-		else if(IsKeyDown(KEY_UP))
-		{
-			_IDE_gotoBeforeLine(side);
-			if(side->cursor.y==side->offsety && side->offsety>0) 
+			else if(IsKeyDown(KEY_DOWN))
 			{
-				side->offsety--;
+				_IDE_gotoNextLine(side);
+				if(side->cursor.y>side->offsety+34) 
+				{
+					side->offsety++;
+				}
+				side->timer = 0.08f;
 			}
-			side->timer = 0.08f;
-		}
-		else if(GetMouseWheelMove()<0)
-		{
-			_IDE_gotoNextLine(side);
-			_IDE_gotoNextLine(side);
-			if(side->cursor.y>side->offsety+34) 
+			else if(IsKeyDown(KEY_UP))
 			{
-				side->offsety+=2;
+				_IDE_gotoBeforeLine(side);
+				if(side->cursor.y==side->offsety && side->offsety>0) 
+				{
+					side->offsety--;
+				}
+				side->timer = 0.08f;
 			}
-			side->timer = 0.03f;
-		}
-		else if(GetMouseWheelMove()>0)
-		{
-			_IDE_gotoBeforeLine(side);
-			_IDE_gotoBeforeLine(side);
-			if(side->cursor.y==side->offsety && side->offsety>1) 
+			else if(GetMouseWheelMove()<0)
 			{
-				side->offsety-=2;
+				_IDE_gotoNextLine(side);
+				_IDE_gotoNextLine(side);
+				if(side->cursor.y>side->offsety+34) 
+				{
+					side->offsety+=2;
+				}
+				side->timer = 0.03f;
 			}
-			side->timer = 0.03f;
+			else if(GetMouseWheelMove()>0)
+			{
+				_IDE_gotoBeforeLine(side);
+				_IDE_gotoBeforeLine(side);
+				if(side->cursor.y==side->offsety && side->offsety>1) 
+				{
+					side->offsety-=2;
+				}
+				side->timer = 0.03f;
+			}
+			else
+			{
+				int key = Kbd_GetKeyPressed(side->layout);
+				//int key=0;
+				switch(key)
+				{
+					case KEY_BACKSPACE:
+						_IDE_remChar(side);
+					break;
+					case KEY_SPACE:
+						_IDE_addChar(side,' ');
+					break;
+					case KEY_TAB:
+						_IDE_addChar(side,'\t');
+					break;
+					case KEY_ENTER:
+						// if(side->cursor.x==0)
+						// {
+						// 	for(int i=MAX_LINE-1;i>=side->cursor.y+1;i--)
+						// 	{
+						// 			strcpy(side->itext[i+1],side->itext[i]);
+						// 			strcpy(side->itext[i],"");
+						// 	}
+						// 	side->cursor.y++;
+						// }
+						// else 
+						if(side->cursor.x==strlen(side->itext[side->cursor.y]))
+						{
+							if(side->cursor.y<MAX_LINE)
+							{
+								side->cursor.x=0;
+								side->cursor.y++;
+							}
+						}
+					break;
+					case KEY_F5:
+						system(TextFormat("tic80 --skip %s",side->file_name));
+					break;
+					case KEY_F1:
+						//_ITEXT_toCart(side);
+						//CART_save(side->cart,"t.lua");
+					break;
+					default:
+						//const char* lc = TextFormat("%c",key);
+						if( key != KEY_LEFT_SHIFT && 
+							key != KEY_RIGHT_SHIFT && 
+							key != KEY_LEFT_ALT &&
+							key != KEY_RIGHT_ALT &&
+							key != KEY_LEFT_CONTROL &&
+							key != KEY_RIGHT_CONTROL &&
+							key != 0)
+						_IDE_addChar(side,*TextFormat("%c",key));
+					break;
+				}
+			}
 		}
 		else
-		{
-			int key = Kbd_GetKeyPressed(side->layout);
-			//int key=0;
-			switch(key)
-			{
-				case KEY_BACKSPACE:
-					_IDE_remChar(side);
-				break;
-				case KEY_SPACE:
-					_IDE_addChar(side,' ');
-				break;
-				case KEY_TAB:
-					_IDE_addChar(side,'\t');
-				break;
-				case KEY_ENTER:
-					// if(side->cursor.x==0)
-					// {
-					// 	for(int i=MAX_LINE-1;i>=side->cursor.y+1;i--)
-					// 	{
-					// 			strcpy(side->itext[i+1],side->itext[i]);
-					// 			strcpy(side->itext[i],"");
-					// 	}
-					// 	side->cursor.y++;
-					// }
-					// else 
-					if(side->cursor.x==strlen(side->itext[side->cursor.y]))
-					{
-						if(side->cursor.y<MAX_LINE)
-						{
-							side->cursor.x=0;
-							side->cursor.y++;
-						}
-					}
-				break;
-				case KEY_F5:
-					system(TextFormat("tic80 --skip %s",side->file_name));
-				break;
-				case KEY_F1:
-					//_ITEXT_toCart(side);
-					//CART_save(side->cart,"t.lua");
-				break;
-				default:
-					//const char* lc = TextFormat("%c",key);
-					if( key != KEY_LEFT_SHIFT && 
-						key != KEY_RIGHT_SHIFT && 
-						key != KEY_LEFT_ALT &&
-						key != KEY_RIGHT_ALT &&
-						key != KEY_LEFT_CONTROL &&
-						key != KEY_RIGHT_CONTROL &&
-						key != 0)
-					_IDE_addChar(side,*TextFormat("%c",key));
-				break;
-			}
-		}
+			side->timer -= GetFrameTime();
+		
 	}
-	else
-		side->timer -= GetFrameTime();
-	
+
 	if(IsKeyDown(KEY_LEFT_CONTROL) ||
-			IsKeyDown(KEY_RIGHT_CONTROL))
+				IsKeyDown(KEY_RIGHT_CONTROL))
 	{
 		side->uimenu.visible=true;
 	}	
@@ -304,7 +308,7 @@ void IDE_update(struct IDE* side)
 	// 		side->cursor.y = y;
 	// 	}
 	// }
-	UI_MENU_update(&side->uimenu);
+	IDE_MENU_update(&side->uimenu);
 }
 
 void IDE_draw(struct IDE* side)
@@ -321,6 +325,10 @@ void IDE_draw(struct IDE* side)
 		}
 	}
 	CURSOR_draw(side);
-	UI_MENU_draw(&side->uimenu);
+	IDE_MENU_draw(&side->uimenu);
 }
 
+void IDE_free(struct IDE *side)
+{
+	IDE_MENU_free(&side->uimenu);
+}
