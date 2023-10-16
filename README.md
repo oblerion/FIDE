@@ -4,5 +4,6 @@
   
 ## Features:
 - edit text file
-- load/save file
+- load file (ctrl+o)
+- save file (ctrl+s)
 
