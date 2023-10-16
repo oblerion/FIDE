@@ -1,14 +1,18 @@
 #ifndef IDE_MENU_H
 #define IDE_MENU_H
 #include "raylib.h"
-#include "ui.h"
 struct IDE_MENU
 {
-    struct UI_FILEIO uifileio;
     bool visible;
 };
+enum IDE_MENU_ID
+{
+    MENU_default=0,
+    MENU_open=1,
+    MENU_save=2,
+    MENU_parameter=3
+};
+typedef enum IDE_MENU_ID IDE_MENU_ID;
 struct IDE_MENU IDE_MENU();
-void IDE_MENU_update(struct IDE_MENU* uimenu);
-void IDE_MENU_draw(struct IDE_MENU* uimenu);
-void IDE_MENU_free(struct IDE_MENU* uimenu);
+IDE_MENU_ID IDE_MENU_draw(struct IDE_MENU* uimenu);
 #endif

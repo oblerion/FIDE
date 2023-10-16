@@ -3,6 +3,8 @@
 #include "raylib.h"
 #include "kbd_layout.h"
 #include "ide_menu.h"
+#include "ide_parameter.h"
+#include "ui.h"
 #include "math.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -19,12 +21,15 @@ struct CURSOR
 
 struct IDE
 {
-	char file_name[40];
+	
 	struct CURSOR cursor;
 	struct IDE_MENU uimenu;
+    struct UI_FILEIO uifileio;
+	struct IDE_PARAMETER idepara;
 	KBD_Layout layout;
+	
+	char file_name[124];
 	char itext[MAX_LINE][200];
-	char kbd_layout[20];
 	int font_size;
 	unsigned int size;
 	int max_size;

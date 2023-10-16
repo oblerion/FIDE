@@ -1,48 +1,42 @@
 #include "ide_menu.h"
 #define MAX_SIZE 3
-const char BTN_NAME[MAX_SIZE][10] = 
+const char BTN_NAME[MAX_SIZE][15] = 
 {
     "[o]pen",
     "[s]ave",
-    "[c]lose"
+    "[p]arameter"
 };
 
 struct IDE_MENU IDE_MENU()
 {
     struct IDE_MENU uimenu;
-    uimenu.uifileio = UI_FILEIO(30,30,BLACK);
-    uimenu.uifileio.visible=false;
     uimenu.visible=0;
     return uimenu;
 }
 
-void IDE_MENU_update(struct IDE_MENU* uimenu)
+IDE_MENU_ID IDE_MENU_draw(struct IDE_MENU* uimenu)
 {
-    if(uimenu->visible==1)
+    int ret=MENU_default;
+    if(IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL))
     {
-        if(IsKeyDown(KEY_LEFT_CONTROL) || 
-            IsKeyDown(KEY_RIGHT_CONTROL))
-        {
-            if(IsKeyPressed(KEY_O) && uimenu->uifileio.visible==false) 
-            {
-                uimenu->uifileio.visible=true;
-            }
-            else if(IsKeyPressed(KEY_S))
-            {
-
-            }
-            else if(IsKeyPressed(KEY_C))
-            {
-
-            }
-        }
+        uimenu->visible=true;
     }
-}
+    else uimenu->visible=false;
 
-void IDE_MENU_draw(struct IDE_MENU* uimenu)
-{
-    if(uimenu->visible==1)
+    if(uimenu->visible)
     {
+        if(IsKeyPressed(KEY_O)) 
+        {
+            ret=MENU_open;
+        }
+        else if(IsKeyPressed(KEY_S))
+        {
+            ret=MENU_save;
+        }
+        else if(IsKeyPressed(KEY_P))
+        {
+            ret=MENU_parameter;
+        }
         const int size = 24;
         DrawRectangle(2,2,4*size,MAX_SIZE*size,BLUE);
         DrawRectangleLines(2,2,4*size,MAX_SIZE*size,BLACK);
@@ -53,13 +47,6 @@ void IDE_MENU_draw(struct IDE_MENU* uimenu)
 
       
     }
-    if(UI_FILEIO_draw(&uimenu->uifileio,1)==1)
-    {
-        uimenu->uifileio.visible=false;
-    }
+    return ret;
 }
 
-void IDE_MENU_free(struct IDE_MENU *uimenu)
-{
-    UI_FILEIO_free(&uimenu->uifileio);
-}

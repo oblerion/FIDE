@@ -30,20 +30,23 @@ void _ITEXT_init(struct IDE* ide,const char* code)
 {
 	int ic=0;
 	int il=0;
-	for(int pos=0;pos<strlen(code)-1;pos++)
+	if(strlen(code)>0)
 	{
-		char lchar = code[pos];
-		if(lchar!='\n')
+		for(int pos=0;pos<strlen(code)-1;pos++)
 		{
-			ide->itext[il][ic] = lchar;
-			ic++;
-		}
-		else
-		{
-			ide->itext[il][ic] = '\0';
-			ic=0;
-			if(il+1<2499) il++;
-			else break;
+			char lchar = code[pos];
+			if(lchar!='\n')
+			{
+				ide->itext[il][ic] = lchar;
+				ic++;
+			}
+			else
+			{
+				ide->itext[il][ic] = '\0';
+				ic=0;
+				if(il+1<MAX_LINE) il++;
+				else break;
+			}
 		}
 	}
 	for(int y=il;y<MAX_LINE;y++)
@@ -161,16 +164,30 @@ void IDE_load(struct IDE* side,const char* file)
 	side->offsety = 0;
 	side->font_size = 25;
 	side->max_size = 500000;
-	strcpy(side->file_name,file);
+	
 	side->layout = EN;
 	side->offset_borderx = MeasureText("000000",18);
-	_ITEXT_init(side,LoadFileText(file));
+	if(FileExists(file))
+	{
+		char* code = LoadFileText(file);
+		strcpy(side->file_name,file);
+		_ITEXT_init(side,code);
+	}
+	else
+	{
+		_ITEXT_init(side,"");
+		strcpy(side->file_name,"");
+	}	
 	side->cursor = CURSOR_init();
 	side->uimenu = IDE_MENU();
+    side->uifileio = UI_FILEIO(30,30,BLACK);
+    side->uifileio.visible=false;
+
+	side->idepara = IDE_PARAMETER();
 }
 void IDE_update(struct IDE* side)
 {
-	if(side->uimenu.uifileio.visible==false)
+	if(side->uimenu.visible==false)
 	{
 		if(side->timer<=0)
 		{
@@ -285,30 +302,6 @@ void IDE_update(struct IDE* side)
 			side->timer -= GetFrameTime();
 		
 	}
-
-	if(IsKeyDown(KEY_LEFT_CONTROL) ||
-				IsKeyDown(KEY_RIGHT_CONTROL))
-	{
-		side->uimenu.visible=true;
-	}	
-	else
-	{
-		side->uimenu.visible=false;
-	}
-
-
-	// if(IsMouseButtonPressed(0))
-	// {
-	// 	int x;
-	// 	int y;
-	// 	_IDE_ifCollideMouse(*side,&x,&y);
-	// 	if(x>-1 && y>-1)
-	// 	{
-	// 		side->cursor.x = x;
-	// 		side->cursor.y = y;
-	// 	}
-	// }
-	IDE_MENU_update(&side->uimenu);
 }
 
 void IDE_draw(struct IDE* side)
@@ -325,10 +318,43 @@ void IDE_draw(struct IDE* side)
 		}
 	}
 	CURSOR_draw(side);
-	IDE_MENU_draw(&side->uimenu);
+	if(side->uifileio.visible==false)
+	{
+		char cstr[MAX_LINE*200];
+		switch(IDE_MENU_draw(&side->uimenu))
+		{
+			case 1:
+				side->uifileio.visible=true;
+			break;
+			case 2:
+				
+				for(int i=0;i<MAX_LINE;i++)
+				{
+					strcat(cstr,side->itext[i]);
+					strcat(cstr,"\n");
+				}
+				if(FileExists(side->file_name))
+				{
+					FILE* fic = fopen(side->file_name,"w");
+					fprintf(fic,"%s",cstr);
+					fclose(fic);
+				}else 
+					printf("not exist: %s\n",side->file_name);
+			break;
+			case 3:
+				side->idepara.visible=true;
+			break;
+		}
+	}
+ 	if(UI_FILEIO_draw(&side->uifileio,1)==1)
+    {
+        side->uifileio.visible=false;
+		IDE_load(side,UI_FILEIO_getFullPath(&side->uifileio));
+    }
+	IDE_PARAMETER_draw(&side->idepara);
 }
 
 void IDE_free(struct IDE *side)
 {
-	IDE_MENU_free(&side->uimenu);
+	UI_FILEIO_free(&side->uifileio);
 }

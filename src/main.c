@@ -17,14 +17,14 @@ int main(int npar,const char* lpar[])
     struct IDE side;
     if(npar==1)
     {
-        IDE_load(&side,"./test.lua");
+        IDE_load(&side,"");
         side.layout = FR_BEL_VAR;
     }
     else
     {
         if(FileExists(lpar[1]))
         {
-            IDE_load(&side,lpar[1]);
+           IDE_load(&side,lpar[1]);
             side.layout = FR_BEL_VAR;
         }
         else
