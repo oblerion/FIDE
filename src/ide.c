@@ -81,7 +81,7 @@ void _IDE_ifCollideMouse(struct IDE side,int* px,int* py)
 
 	int mousex = GetMouseX();
 	int mousey = GetMouseY()+5;
-	int my = floor(mousey/side.font_size)+side.offsety;
+	int my = (mousey/side.font_size)+side.offsety;
 	int size = strlen(side.itext[my]);
 
 	int ix=0;
@@ -344,6 +344,7 @@ void IDE_draw(struct IDE* side)
 			case 3:
 				side->idepara.visible=true;
 			break;
+			default:;
 		}
 	}
  	if(UI_FILEIO_draw(&side->uifileio,1)==1)
