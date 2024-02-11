@@ -1,6 +1,6 @@
 # Work in progress
 ## Dependencies:
-- raylib.h (v4.5)
+- raylib.h (v5.0)
   
 ## Features:
 - edit text file
