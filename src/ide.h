@@ -37,7 +37,6 @@ struct IDE
 	char itext[MAX_LINE][200];
 };
 struct IDE IDE_init(int narg,char* sarg[]);
-//void IDE_load(struct IDE* side,const char* file);
 void IDE_update(struct IDE* side);
 void IDE_draw(struct IDE* side);
 void IDE_free(struct IDE* side);
