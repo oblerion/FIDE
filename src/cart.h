@@ -1,5 +1,4 @@
-#ifndef CART_H
-#define CART_H
+#pragma once
 #include "raylib.h"
 #include <math.h>
 #include <stdlib.h>
@@ -32,4 +31,3 @@ struct CART
 };
 struct CART CART_load(const char* file);
 void CART_save(struct CART cart,char* file);
-#endif

@@ -60,5 +60,36 @@ elif [ "$1" == "w" ];then
 	comp;
 	link;
 elif [ "$1" == "web" ];then
-	emcc -o game.html main.c -Os -Wall -I${RAYLIBWEB}/include -L${RAYLIBWEB}/lib -llibraylib.a -s USE_GLFW=3 -DPLATFORM_WEB
+	DEXEC="build/web"
+#	emcc -o game.html main.c -Os -Wall -I${RAYLIBWEB}/include -L${RAYLIBWEB}/lib -llibraylib.a -s USE_GLFW=3 -DPLATFORM_WEB
+	for n in $DEXEC/* ;do
+		if [ $n != "$DEXEC/favicon.ico" ] && [ $n != "$DEXEC/index.html" ];then
+			rm -f $n
+		fi
+	done
+# can craft with void ./asset dir
+	if [ -f "src/main.cpp" ];then
+		cd src;
+		for i in "*.cpp" ;do
+			em++ -c $i -I$RAYLIBWEB/include -Isrc;
+			#echo $TCC -c $i -I../include;
+		done;
+		cd ..;
+		em++ -o build/web/index.js src/*.o -Os -Wall $RAYLIBWEB/lib/libraylib.a -I. -Iinclude -L. -Llib -s USE_GLFW=3 -s ASYNCIFY -DPLATFORM_WEB --preload-file ./asset;
+		# echo "$TCC -o build/web/index.js src/*.o -Os -Wall $RAYLIBWEB/lib/libraylib.a -I. -Iinclude -L. -Llib -s USE_GLFW=3 -s ASYNCIFY -DPLATFORM_WEB --preload-file ./asset"
+	elif [ -f "src/main.c" ];then
+		cd src;
+		for i in "*.c" ;do
+			emcc -c $i -I$RAYLIBWEB/include -Isrc;
+			#echo $TCC -c $i -I../include;
+		done;
+		cd ..;
+		emcc -o build/web/index.js src/*.o -Os -Wall $RAYLIBWEB/lib/libraylib.a -I. -Iinclude -L. -Llib -s USE_GLFW=3 -s ASYNCIFY -DPLATFORM_WEB --preload-file ./asset;
+		echo "emcc -o build/web/index.js src/*.o -Os -Wall $RAYLIBWEB/lib/libraylib.a -I. -Iinclude -L. -Llib -s USE_GLFW=3 -s ASYNCIFY -DPLATFORM_WEB --preload-file ./asset";
+	fi
+
+	if [ "$2" = "z" ]; then
+		cd build/web;
+		zip -o ../index.zip *
+	fi
 fi

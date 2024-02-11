@@ -1,5 +1,4 @@
-#ifndef IDE_H
-#define IDE_H
+#pragma once
 #include "raylib.h"
 #include "kbd_layout.h"
 #include "ide_menu.h"
@@ -21,24 +20,24 @@ struct CURSOR
 
 struct IDE
 {
-	
 	struct CURSOR cursor;
 	struct IDE_MENU uimenu;
     struct UI_FILEIO uifileio;
 	struct IDE_PARAMETER idepara;
 	KBD_Layout layout;
 	
-	char file_name[124];
-	char itext[MAX_LINE][200];
 	int font_size;
 	unsigned int size;
 	int max_size;
 	int offsety;
 	int offset_borderx;
 	float timer;
+
+	char file_name[124];
+	char itext[MAX_LINE][200];
 };
-void IDE_load(struct IDE* side,const char* file);
+struct IDE IDE_init(int narg,char* sarg[]);
+//void IDE_load(struct IDE* side,const char* file);
 void IDE_update(struct IDE* side);
 void IDE_draw(struct IDE* side);
 void IDE_free(struct IDE* side);
-#endif 

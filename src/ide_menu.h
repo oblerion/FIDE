@@ -1,5 +1,4 @@
-#ifndef IDE_MENU_H
-#define IDE_MENU_H
+#pragma once
 #include "raylib.h"
 struct IDE_MENU
 {
@@ -15,4 +14,3 @@ enum IDE_MENU_ID
 typedef enum IDE_MENU_ID IDE_MENU_ID;
 struct IDE_MENU IDE_MENU();
 IDE_MENU_ID IDE_MENU_draw(struct IDE_MENU* uimenu);
-#endif

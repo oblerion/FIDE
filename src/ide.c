@@ -1,5 +1,6 @@
 #include "ide.h"
-struct CURSOR CURSOR_init()
+
+struct CURSOR CURSOR()
 {
 	struct CURSOR cur ={
 		0,0,0.5,WHITE
@@ -7,22 +8,21 @@ struct CURSOR CURSOR_init()
 	return cur;
 }
 
-void CURSOR_draw(struct IDE *ide)
+void CURSOR_draw(struct CURSOR* cursor,struct IDE* ide)
 {
-	if(ide->cursor.timer>0)
+	if(cursor->timer>0)
 	{
-		int y = 20+ide->cursor.y*ide->font_size;
-		int x = ide->offset_borderx+MeasureText(TextSubtext(ide->itext[ide->cursor.y],0,ide->cursor.x),ide->font_size);
-		// const char* schar = TextFormat("%c",ide.itext[ide.cursor.y][ide.cursor.x]);
-		DrawRectangleLines(x,y-(ide->offsety*ide->font_size),3,ide->font_size,ide->cursor.color);
+		int y = 20+cursor->y*ide->font_size;
+		int x = ide->offset_borderx+MeasureText(TextSubtext(ide->itext[cursor->y],0,ide->cursor.x),ide->font_size);
+		DrawRectangleLines(x,y-(ide->offsety*ide->font_size),3,ide->font_size,cursor->color);
 
-		ide->cursor.timer -= GetFrameTime();
+		cursor->timer -= GetFrameTime();
 	}
-	else if(ide->cursor.timer<0)
+	else if(cursor->timer<0)
 	{
-		ide->cursor.timer -= GetFrameTime();
-		if(ide->cursor.timer<-0.2)
-			ide->cursor.timer = 0.3;
+		cursor->timer -= GetFrameTime();
+		if(cursor->timer<-0.2)
+			cursor->timer = 0.3;
 	}
 }
 
@@ -159,32 +159,41 @@ void _IDE_remChar(struct IDE* ide)
 		}
 	}
 }
-void IDE_load(struct IDE* side,const char* file)
+struct IDE IDE_init(int narg, char *sarg[])
 {
-	side->offsety = 0;
-	side->font_size = 25;
-	side->max_size = 500000;
-	
-	side->layout = EN;
-	side->offset_borderx = MeasureText("000000",18);
-	if(FileExists(file))
+	struct IDE ide = {	
+		CURSOR(),
+		IDE_MENU(),
+		UI_FILEIO(30,30,BLACK),
+		IDE_PARAMETER(),
+		FR_BEL_VAR,
+		25,
+		25,
+		500000,
+		0,
+		MeasureText("000000",18),
+		0
+	};
+	ide.uifileio.visible=false;
+	if(narg==1)
+    {
+		_ITEXT_init(&ide,"");
+		strcpy(ide.file_name,"");
+    }
+    else if(FileExists(sarg[1]))
 	{
-		char* code = LoadFileText(file);
-		strcpy(side->file_name,file);
-		_ITEXT_init(side,code);
+		char* code = LoadFileText(sarg[1]);
+		strcpy(ide.file_name,sarg[1]);
+		_ITEXT_init(&ide,code);
 	}
 	else
 	{
-		_ITEXT_init(side,"");
-		strcpy(side->file_name,"");
-	}	
-	side->cursor = CURSOR_init();
-	side->uimenu = IDE_MENU();
-    side->uifileio = UI_FILEIO(30,30,BLACK);
-    side->uifileio.visible=false;
-
-	side->idepara = IDE_PARAMETER();
+		puts("error in loading");
+	}
+    
+	return ide;
 }
+
 void IDE_update(struct IDE* side)
 {
 	if(side->uimenu.visible==false)
@@ -317,7 +326,7 @@ void IDE_draw(struct IDE* side)
 			side->offset_borderx,20+(y*side->font_size)-(side->offsety*side->font_size),side->font_size,BLACK);
 		}
 	}
-	CURSOR_draw(side);
+	CURSOR_draw(&side->cursor,side);
 	if(side->uifileio.visible==false)
 	{
 		char cstr[MAX_LINE*200];
@@ -350,7 +359,8 @@ void IDE_draw(struct IDE* side)
  	if(UI_FILEIO_draw(&side->uifileio,1)==1)
     {
         side->uifileio.visible=false;
-		IDE_load(side,UI_FILEIO_getFullPath(&side->uifileio));
+		// IDE_load(side,UI_FILEIO_getFullPath(&side->uifileio));
+		*side = IDE_init(2,UI_FILEIO_getFullPath(&side->uifileio));
     }
 	IDE_PARAMETER_draw(&side->idepara);
 }
