@@ -1,6 +1,6 @@
 #include "raylib.h"
-#include "ide.h"
 #include "ui.h"
+#include "fide.h"
 
 int main(int npar,const char* lpar[])
 {
@@ -14,18 +14,17 @@ int main(int npar,const char* lpar[])
     InitWindow(screenWidth, screenHeight, "FIDE ver 0.1");
 
     SetTargetFPS(30);   // Set our game to run at 60 frames-per-second
-    struct IDE side = IDE_init(npar,lpar);
+    struct FIDE fide = FIDE(30);
+    FIDE_Load(&fide,"test.lua");
     puts("IDE is load");
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
-        IDE_update(&side);
         BeginDrawing();
             ClearBackground(BLUE);
-            IDE_draw(&side);
+            FIDE_Draw(&fide);
         EndDrawing();
     }
     CloseWindow();        // Close window and OpenGL
-    IDE_free(&side);
     return 0;
 }
 
