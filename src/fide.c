@@ -57,78 +57,130 @@ void FIDE_Load(struct FIDE *fide, const char *file)
     }
 }
 
-void FIDE_ForwardCursor(struct FIDE *fide)
+void _FIDE_MoveCursor(struct FIDE *fide)
 {
-    int tmp_pos = fide->cursor.pos;
-    if(tmp_pos+1<fide->max_size)
+    if(IsKeyPressed(KEY_RIGHT))
     {
-        //fide->cursor.pos++;
-        if(fide->text[fide->cursor.pos+1]!='\n')
+        if(fide->cursor.pos+1<fide->max_size &&
+            fide->cursor.pos+1 < strlen(fide->text))
         {
-            fide->cursor.x += MeasureText(
-                TextFormat("%c",fide->text[fide->cursor.pos+1]),
-                fide->font_size);
-            fide->cursor.pos++;
+            // if(fide->text[ fide->cursor.pos+1] == '\n') 
+            //     fide->cursor.pos+=2;
+            // else
+                fide->cursor.pos++;
         }
-        else 
+    }
+    if(IsKeyPressed(KEY_LEFT))
+    {
+        if(fide->cursor.pos>0)
         {
-            fide->cursor.x = 0;
-            fide->cursor.y += fide->font_size*0.5f;
-            fide->cursor.pos++;
+            // if(fide->text[ fide->cursor.pos-1] == '\n') 
+            //     fide->cursor.pos-=2;
+            // else 
+                fide->cursor.pos--;
         }
     }
 }
 
-void FIDE_BackwardCursor(struct FIDE *fide)
-{
-    int tmp_pos = fide->cursor.pos;
-    if(tmp_pos-1>0)
-    {
-        if(fide->text[fide->cursor.pos-1]!='\n')
-        {
-            fide->cursor.x += MeasureText(
-                TextFormat("%c",fide->text[fide->cursor.pos-1]),
-                fide->font_size);
-            fide->cursor.pos--;           
-        }
-        else
-        {
-            fide->cursor.x = 0;
-            fide->cursor.y -= fide->font_size*0.5f;
-            fide->cursor.pos--;
-        }
-    }
-}
-
-
-void FIDE_Draw(struct FIDE *fide)
+void _FIDE_DrawText(struct FIDE *fide)
 {
     const int offx = 20;
     const int offy = 10;
     const int size = strlen(fide->text);
-    int tmp_pos=0;
-    int lx=0;
-    int ly=0;
+
+    int tmp_pos = 0;
+    int tmp_y = 0;
+    for(int i=0;i<size;i++)
+    {
+        if(fide->text[i]=='\n' || i+1==size)
+        {
+            const char* sstr = TextSubtext(fide->text,tmp_pos,i-tmp_pos); 
+            DrawText(sstr,offx,offy+tmp_y,fide->font_size,BLACK);
+            tmp_y += fide->font_size;               
+            tmp_pos=i+1;
+        }
+
+        if(i==fide->cursor.pos)
+        {
+            const char* before_cur = TextSubtext(fide->text,tmp_pos,fide->cursor.pos-tmp_pos);      
+            fide->cursor.x = MeasureText(before_cur,fide->font_size); 
+            fide->cursor.y = tmp_y;        
+        }
+    }
+    CURSOR_draw(&fide->cursor,offx,offy,fide->font_size);
+}
+
+char _TextMaj(char c)
+{
+    char lc = c;
+    if(c>=KEY_A+32 && c<=KEY_Z+32)
+    {
+        lc -= 32;
+    }
+    return lc;
+}
+
+void _FIDE_AddChar(struct FIDE *fide,char k)
+{
+    if(fide->max_size>strlen(fide->text)+1)
+    {
+        strcat(fide->text," ");
+        for(int i=strlen(fide->text)-1;i>fide->cursor.pos;i--)
+        {
+            fide->text[i] = fide->text[i-1];
+        }
+        fide->text[fide->cursor.pos]=k;
+        fide->cursor.pos++;
+    }
+}
+
+void _FIDE_DelChar(struct FIDE *fide)
+{
+    const int lp = fide->cursor.pos-1;
+    if(lp>=0)
+    {
+        for(int i=lp;i<strlen(fide->text);i++)
+        {
+            fide->text[i] = fide->text[i+1];
+        } 
+        fide->cursor.pos=lp;
+    }
+}
+
+
+void _FIDE_Input(struct FIDE *fide)
+{
+    const int ck = GetCharPressed();
+    if((IsKeyDown(KEY_RIGHT_SHIFT) || 
+        IsKeyDown(KEY_LEFT_SHIFT))
+        && (ck>=KEY_A && ck<=KEY_Z))
+            _FIDE_AddChar(fide,ck);
+    else if((ck>=KEY_A+32 && ck<=KEY_Z+32))
+            _FIDE_AddChar(fide,ck);
+
+    if(IsKeyPressed(KEY_ENTER))
+    {
+        _FIDE_AddChar(fide,'\n');
+    }
+    else if(IsKeyPressed(KEY_SPACE))
+    {
+        _FIDE_AddChar(fide,' ');
+    }
+    else if(IsKeyPressed(KEY_BACKSPACE))
+    {
+        _FIDE_DelChar(fide);
+    }
+} 
+
+void FIDE_Draw(struct FIDE *fide)
+{
+
     // draw text and cursor
     if(fide->text!=NULL)
     {
-        if(IsKeyPressed(KEY_RIGHT))
-            FIDE_ForwardCursor(fide);
-        else if(IsKeyPressed(KEY_LEFT))
-            FIDE_BackwardCursor(fide);
-
-        for(int i=0;i<size;i++)
-        {
-            if(fide->text[i]=='\n')
-            {
-                const char* cstr = strsub(fide->text,tmp_pos,i);
-                DrawText(cstr,offx+lx,offy+ly,fide->font_size,BLACK);
-                tmp_pos=i;
-                ly += fide->font_size*0.5f;
-                if(strlen(cstr)==0) ly += fide->font_size*0.5f;
-            }
-        }
-        CURSOR_draw(&fide->cursor,offx,offy,fide->font_size);
+        _FIDE_MoveCursor(fide);
+        _FIDE_Input(fide);
+        _FIDE_DrawText(fide);
     }
 }
 

@@ -14,7 +14,7 @@ int main(int npar,const char* lpar[])
     InitWindow(screenWidth, screenHeight, "FIDE ver 0.1");
 
     SetTargetFPS(30);   // Set our game to run at 60 frames-per-second
-    struct FIDE fide = FIDE(30);
+    struct FIDE fide = FIDE(40);
     FIDE_Load(&fide,"test.lua");
     puts("IDE is load");
     while (!WindowShouldClose())    // Detect window close button or ESC key
