@@ -1,8 +1,12 @@
 ## a0.1
 ### bugs
-- [ ] cleanning ide.c
-- [ ] move to fide.c
-- [ ] draw text with str not table
-- [ ] start file can't be save
+- [x] start file can't be save
+- [x] add special caractere
+- [x] move cursor on all doc
+- [ ] line out of screen
+
 ### new feature
+- [x] file save
+- [x] file load arg
 - [ ] load file drag/drop
+- [ ] text minimap

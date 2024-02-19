@@ -8,29 +8,15 @@ EXEC=main
 
 all: link run
 
-link: main.o ui.o kbd_layout.o ide.o ide_menu.o ide_parameter.o math.o
-	$(CC) $(DOBJ)/main.o $(DOBJ)/ui.o $(DOBJ)/kbd_layout.o $(DOBJ)/ide.o $(DOBJ)/ide_menu.o $(DOBJ)/ide_parameter.o $(DOBJ)/math.o -g -Wall -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -o $(DEXEC)/$(EXEC)
-
+link: main.o ide_menu.o fide.o
+	$(CC) $(DOBJ)/main.o $(DOBJ)/fide.o $(DOBJ)/ide_menu.o -g -Wall -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -o $(DEXEC)/$(EXEC)
 main.o: ${DSRC}/main.c
 	$(CC) -c $(DSRC)/main.c -Isrc -Wall -o $(DOBJ)/main.o
-
-ui.o: $(DSRC)/ui.c
-	$(CC) -c $(DSRC)/ui.c -Isrc -Wall -o $(DOBJ)/ui.o
-
-kbd_layout.o: $(DSRC)/kbd_layout.c
-	$(CC) -c $(DSRC)/kbd_layout.c -Isrc -Wall -o $(DOBJ)/kbd_layout.o
-	
-ide.o: $(DSRC)/ide.c
-		$(CC) -c $(DSRC)/ide.c -Isrc -Wall -o $(DOBJ)/ide.o
-
 ide_menu.o: $(DSRC)/ide_menu.c
-		$(CC) -c $(DSRC)/ide_menu.c -Isrc -Wall -o $(DOBJ)/ide_menu.o
+	$(CC) -c $(DSRC)/ide_menu.c -Isrc -Wall -o $(DOBJ)/ide_menu.o
 		
-ide_parameter.o: $(DSRC)/ide_parameter.c
-		$(CC) -c $(DSRC)/ide_parameter.c -Isrc -Wall -o $(DOBJ)/ide_parameter.o
-	
-math.o: $(DSRC)/math.c
-		$(CC) -c $(DSRC)/math.c -Isrc -Wall -o $(DOBJ)/math.o
+fide.o: $(DSRC)/fide.c
+	$(CC) -c $(DSRC)/fide.c -Isrc -Wall -o $(DOBJ)/fide.o
 		
 run:
 	cd $(DEXEC)

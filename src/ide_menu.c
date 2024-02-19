@@ -7,23 +7,10 @@ const char BTN_NAME[MAX_SIZE][15] =
     "[p]arameter"
 };
 
-struct IDE_MENU IDE_MENU()
-{
-    struct IDE_MENU uimenu;
-    uimenu.visible=0;
-    return uimenu;
-}
-
-IDE_MENU_ID IDE_MENU_draw(struct IDE_MENU* uimenu)
+enum IDE_MENU_ID IDE_MENU_draw()
 {
     int ret=MENU_default;
     if(IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL))
-    {
-        uimenu->visible=true;
-    }
-    else uimenu->visible=false;
-
-    if(uimenu->visible)
     {
         if(IsKeyPressed(KEY_O)) 
         {
@@ -44,8 +31,6 @@ IDE_MENU_ID IDE_MENU_draw(struct IDE_MENU* uimenu)
         {
             DrawText(BTN_NAME[i],2,(i*size)+2,size,BLACK);
         }
-
-      
     }
     return ret;
 }

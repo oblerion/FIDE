@@ -1,16 +1,10 @@
 #pragma once
 #include "raylib.h"
-struct IDE_MENU
-{
-    bool visible;
-};
 enum IDE_MENU_ID
 {
     MENU_default=0,
-    MENU_open=1,
-    MENU_save=2,
-    MENU_parameter=3
+    MENU_open,
+    MENU_save,
+    MENU_parameter
 };
-typedef enum IDE_MENU_ID IDE_MENU_ID;
-struct IDE_MENU IDE_MENU();
-IDE_MENU_ID IDE_MENU_draw(struct IDE_MENU* uimenu);
+enum IDE_MENU_ID IDE_MENU_draw();

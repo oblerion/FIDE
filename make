@@ -5,7 +5,7 @@ CC=clang
 CFLAGS="-g -Wall -lraylib -lGL -lm -lpthread -ldl -lrt -lX11"
 INC=" " 
 EXEC="main"
-DOBJ="build/linux64/obj/"
+DOBJ="build/linux64/"
 
 RAYLIBWIN="/home/desnot/GD/raylib-4.5.0_win32_mingw-w64"
 RAYLIBWEB="/home/desnot/GD/raylib-4.5.0_webassembly"
